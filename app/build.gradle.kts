@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.app.scheduler"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.app.scheduler"
@@ -81,7 +81,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.google.android.gms:play-services-auth-api-phone:18.1.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
-    implementation ("androidx.work:work-runtime-ktx:2.10.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     // Kotlin Coroutines Android Support
@@ -109,6 +108,5 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
 
 }

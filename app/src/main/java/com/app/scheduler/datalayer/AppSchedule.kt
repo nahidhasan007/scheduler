@@ -8,5 +8,5 @@ data class AppSchedule(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val packageName: String,
     val scheduleTime: Long,
-    val status: String = "Scheduled"
+    val executed: Boolean = false
 )

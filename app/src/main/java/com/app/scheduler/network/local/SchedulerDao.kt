@@ -1,23 +1,25 @@
 package com.app.scheduler.network.local
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.app.scheduler.datalayer.AppSchedule
 
 @Dao
-interface SchedulerDao {
+interface ScheduleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(schedule: AppSchedule)
+    suspend fun insertSchedule(schedule: AppSchedule)
 
-    @Query("SELECT * FROM app_schedule ORDER BY scheduleTime ASC")
-    suspend fun getAllSchedules(): List<AppSchedule>
+    @Query("DELETE FROM app_schedule WHERE id = :id")
+    suspend fun deleteSchedule(id: Int)
 
-    @Delete
-    suspend fun delete(schedule: AppSchedule)
+    @Query("UPDATE app_schedule SET scheduleTime = :newTime WHERE id = :id")
+    suspend fun updateSchedule(id: Int, newTime: Long)
 
-    @Query("DELETE FROM app_schedule WHERE id = :scheduleId")
-    suspend fun deleteById(scheduleId: Int)
+    @Query("SELECT * FROM app_schedule WHERE executed = 0 ORDER BY scheduleTime ASC")
+    suspend fun getPendingSchedules(): List<AppSchedule>
+
+    @Query("UPDATE app_schedule SET executed = 1 WHERE id = :id")
+    suspend fun markAsExecuted(id: Int)
 }

@@ -1,15 +1,14 @@
-package com.app.scheduler.network
+package com.app.scheduler.network.local
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.app.scheduler.datalayer.AppSchedule
-import com.app.scheduler.network.local.SchedulerDao
 
-@Database(entities = [AppSchedule::class], version = 1, exportSchema = false)
+@Database(entities = [AppSchedule::class], version = 2, exportSchema = false)
 abstract class SchedulerDatabase : RoomDatabase() {
-    abstract fun schedulerDao(): SchedulerDao
+    abstract fun schedulerDao(): ScheduleDao
 
     companion object {
         @Volatile
