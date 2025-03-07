@@ -3,6 +3,7 @@ package com.app.scheduler.backgroundservice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.app.scheduler.network.local.SchedulerDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +11,7 @@ import kotlinx.coroutines.launch
 
 class AppScheduleLauncher : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
+       Log.e("Scheduler", "in receiver")
         val packageName = intent?.getStringExtra("packageName")
         val scheduleId = intent?.getIntExtra("scheduleId", -1)
 

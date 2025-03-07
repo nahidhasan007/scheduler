@@ -5,6 +5,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -53,6 +54,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     @SuppressLint("ScheduleExactAlarm")
     private fun setAlarm(context: Context, schedule: AppSchedule) {
+        Log.e("Scheduler", "Sending intent")
         val intent = Intent(context, AppScheduleLauncher::class.java).apply {
             putExtra("packageName", schedule.packageName)
             putExtra("scheduleId", schedule.id)
@@ -68,6 +70,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
     }
 
     private fun cancelAlarm(context: Context, id: Int) {
+        Log.e("Scheduler", "Deleting intent")
         val intent = Intent(context, AppScheduleLauncher::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context, id, intent, PendingIntent.FLAG_IMMUTABLE
