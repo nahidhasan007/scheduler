@@ -21,7 +21,7 @@ class SchedulerMainViewModel (private val dao: SchedulerDao) : ViewModel() {
         fetchSchedules()
     }
 
-    fun fetchSchedules() {
+    private fun fetchSchedules() {
         viewModelScope.launch {
             schedules.value = dao.getAllSchedules()
         }
