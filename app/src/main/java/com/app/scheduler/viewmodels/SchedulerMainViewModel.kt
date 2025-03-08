@@ -1,4 +1,4 @@
-package com.app.scheduler
+package com.app.scheduler.viewmodels
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.app.scheduler.backgroundservice.AppScheduleLauncher
 import com.app.scheduler.datalayer.AppSchedule
@@ -31,7 +30,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
     }
 
     fun scheduleApp(context: Context, packageName: String, time: Long) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val schedule = AppSchedule(packageName = packageName, scheduleTime = time)
             dao.insertSchedule(schedule)
             setAlarm(context, schedule)
@@ -39,14 +38,14 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
     }
 
     fun cancelSchedule(context: Context, id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             dao.deleteSchedule(id)
             cancelAlarm(context, id)
         }
     }
 
     fun rescheduleApp(context: Context, id: Int, newTime: Long) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             dao.updateSchedule(id, newTime)
             updateAlarm(context, id, newTime)
         }
@@ -86,11 +85,4 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
     }
 }
 
-class SchedulerMainViewModelFactory(private val dao: ScheduleDao) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SchedulerMainViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST") return SchedulerMainViewModel(dao) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
+

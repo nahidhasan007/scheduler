@@ -1,4 +1,4 @@
-package com.app.scheduler
+package com.app.scheduler.domainlayer
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -36,10 +36,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.app.scheduler.R
+import com.app.scheduler.viewmodels.SchedulerMainViewModel
+import com.app.scheduler.viewmodels.SchedulerMainViewModelFactory
 import com.app.scheduler.datalayer.AppSchedule
 import com.app.scheduler.network.local.SchedulerDatabase
 import com.app.scheduler.ui.theme.MyApplicationTheme
@@ -69,24 +73,54 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun ScheduleItem(schedule: AppSchedule, onCancel: () -> Unit) {
+fun ScheduleItem(schedule: AppSchedule, onCancel: () -> Unit, onReschedule: (Long) -> Unit) {
+    var showTimePicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("App: ${schedule.packageName}", fontWeight = FontWeight.Bold)
-                Text("Scheduled Time: ${Date(schedule.scheduleTime)}")
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("App: ${schedule.packageName}", fontWeight = FontWeight.Bold)
+                    Text("Scheduled Time: ${Date(schedule.scheduleTime)}")
+                }
+                IconButton(onClick = onCancel) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.scheduler_cancel_schedule)
+                    )
+                }
             }
-            IconButton(onClick = onCancel) {
-                Icon(Icons.Default.Delete, contentDescription = "Cancel Schedule")
+
+            Button(onClick = { showTimePicker = true }) {
+                Text("Reschedule")
+            }
+
+            if (showTimePicker) {
+                val timePickerDialog = android.app.TimePickerDialog(
+                    context,
+                    { _, hour, minute ->
+                        calendar.set(Calendar.HOUR_OF_DAY, hour)
+                        calendar.set(Calendar.MINUTE, minute)
+                        onReschedule(calendar.timeInMillis)
+                        showTimePicker = false
+                    },
+                    calendar.get(Calendar.HOUR_OF_DAY),
+                    calendar.get(Calendar.MINUTE),
+                    false
+                )
+                timePickerDialog.show()
             }
         }
     }
 }
+
 
 @Composable
 fun TimePickerDialog(onTimeSelected: (Long) -> Unit) {
@@ -95,7 +129,7 @@ fun TimePickerDialog(onTimeSelected: (Long) -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
 
     Button(onClick = { showDialog = true }) {
-        Text("Pick a Time")
+        Text(stringResource(R.string.scheduler_pick_time))
     }
 
     if (showDialog) {
@@ -124,13 +158,14 @@ fun AppSelector(onAppSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     var selectedApp by remember { mutableStateOf<String?>(null) }
 
-    Box {
+    Box(modifier = Modifier.padding(top = 4.dp)) {
         Button(onClick = { expanded = true }) {
-            Text(selectedApp ?: "Select an App")
+            Text(selectedApp ?: stringResource(R.string.scheduler_select_app))
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             installedApps.forEach { app ->
                 val appName = app.loadLabel(packageManager).toString()
+                val appIcon = app.loadIcon(packageManager)  // for future usage
                 DropdownMenuItem(text = { Text(appName) }, onClick = {
                     selectedApp = appName
                     expanded = false
@@ -151,16 +186,17 @@ fun AppSchedulerUI(
     var selectedApp by remember { mutableStateOf<String?>(null) }
     var scheduleTime by remember { mutableStateOf<Long?>(null) }
 
-    Column(modifier = modifier) {
-        Text("App Scheduler", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+    Column(modifier = modifier.padding(16.dp)) {
+        Text(
+            stringResource(R.string.scheduler_app_scheduler),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
 
-        // Select an App
         AppSelector(onAppSelected = { selectedApp = it })
 
-        // Pick a Time
         TimePickerDialog(onTimeSelected = { scheduleTime = it })
 
-        // Schedule Button
         Button(
             onClick = {
                 if (selectedApp != null && scheduleTime != null) {
@@ -169,17 +205,24 @@ fun AppSchedulerUI(
             },
             enabled = selectedApp != null && scheduleTime != null
         ) {
-            Text("Schedule App")
+            Text(stringResource(R.string.scheduler_schedule_app))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Show Scheduled Apps
         LazyColumn {
             items(schedules) { schedule ->
                 ScheduleItem(
                     schedule,
-                    onCancel = { viewModel.cancelSchedule(context, schedule.id) })
+                    onCancel = { viewModel.cancelSchedule(context, schedule.id) },
+                    onReschedule = { newTime ->
+                        viewModel.rescheduleApp(
+                            context,
+                            schedule.id,
+                            newTime
+                        )
+                    }
+                )
             }
         }
     }

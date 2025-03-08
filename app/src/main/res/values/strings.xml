@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Scheduler</string>
+    <string name="scheduler_select_app">Select an App</string>
+    <string name="scheduler_pick_time">Pick a Time</string>">
+    <string name="scheduler_schedule_app">Schedule App</string>
+    <string name="scheduler_cancel_schedule">Cancel Schedule</string>">
+    <string name="scheduler_app_scheduler">App Scheduler</string>">
 </resources>
