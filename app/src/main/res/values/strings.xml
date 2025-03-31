@@ -5,4 +5,5 @@
     <string name="scheduler_schedule_app">Schedule App</string>
     <string name="scheduler_cancel_schedule">Cancel Schedule</string>">
     <string name="scheduler_app_scheduler">App Scheduler</string>">
+    <string name="scheduler_app_Text">Welcome to App Scheduler. Please select an app and a time to schedule it.</string>">
 </resources>
