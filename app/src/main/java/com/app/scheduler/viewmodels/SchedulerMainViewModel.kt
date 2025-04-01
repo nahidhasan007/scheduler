@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,6 +30,8 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
     private val _isLoadingApps = MutableStateFlow(false)
     val isLoadingApps = _isLoadingApps.asStateFlow()
 
+    val selectedApp = MutableStateFlow<String?>(null)
+
     init {
         fetchSchedules()
     }
@@ -37,6 +40,10 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             schedules.value = dao.getPendingSchedules()
         }
+    }
+
+    fun setSelectedApp(packageName: String) {
+        selectedApp.value = packageName
     }
 
     fun scheduleApp(context: Context, packageName: String, time: Long) {
@@ -48,31 +55,35 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         }
     }
 
-    fun cancelSchedule(context: Context, id: Int) {
+    fun cancelSchedule(context: Context, appSchedule: AppSchedule) {
         viewModelScope.launch(Dispatchers.IO) {
-            dao.deleteSchedule(id)
-            cancelAlarm(context, id)
+            dao.deleteSchedule(appSchedule.id)
+            cancelAlarm(context, appSchedule)
             schedules.value = dao.getPendingSchedules()
         }
     }
 
-    fun rescheduleApp(context: Context, id: Int, newTime: Long) {
+    fun rescheduleApp(context: Context, appSchedule: AppSchedule, newTime: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            dao.updateSchedule(id, newTime)
-            updateAlarm(context, id, newTime)
+            dao.updateSchedule(appSchedule.id, newTime)
+            updateAlarm(context, appSchedule, newTime)
             schedules.value = dao.getPendingSchedules()
         }
     }
 
     @SuppressLint("ScheduleExactAlarm")
     private fun setAlarm(context: Context, schedule: AppSchedule) {
-        Log.e("Scheduler", "Sending intent")
+        Log.e("Scheduler", "Sending intent for package: ${schedule.packageName}")
         val intent = Intent(context, AppScheduleLauncher::class.java).apply {
             putExtra("packageName", schedule.packageName)
             putExtra("scheduleId", schedule.id)
+            data = Uri.parse("appschedule://${schedule.id}")
         }
         val pendingIntent = PendingIntent.getBroadcast(
-            context, schedule.id, intent, PendingIntent.FLAG_IMMUTABLE
+            context,
+            schedule.id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -81,20 +92,20 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         )
     }
 
-    private fun cancelAlarm(context: Context, id: Int) {
+
+    private fun cancelAlarm(context: Context, appSchedule: AppSchedule) {
         Log.e("Scheduler", "Deleting intent")
         val intent = Intent(context, AppScheduleLauncher::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
-            context, id, intent, PendingIntent.FLAG_IMMUTABLE
+            context, appSchedule.id, intent, PendingIntent.FLAG_IMMUTABLE
         )
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent)
     }
 
-    private fun updateAlarm(context: Context, id: Int, newTime: Long) {
-        cancelAlarm(context, id)
-        val schedule = AppSchedule(id = id, scheduleTime = newTime, packageName = "")
-        setAlarm(context, schedule)
+    private fun updateAlarm(context: Context, appSchedule: AppSchedule, newTime: Long) {
+        cancelAlarm(context, appSchedule)
+        setAlarm(context, appSchedule)
     }
 
     fun loadInstalledApps(context: Context) {

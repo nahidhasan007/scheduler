@@ -26,7 +26,6 @@ import com.app.scheduler.viewmodels.SchedulerMainViewModel
 
 @Composable
 fun AppSelector(
-    onAppSelected: (String) -> Unit,
     onLoadApps: () -> Unit,
     viewModel: SchedulerMainViewModel
 ) {
@@ -34,7 +33,7 @@ fun AppSelector(
     val packageManager = context.packageManager
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedApp by remember { mutableStateOf<String?>(null) }
+    val selectedApp by viewModel.selectedApp.collectAsState()
     val installedApps = viewModel.installedApps.collectAsState()
     val isLoading = viewModel.isLoadingApps.collectAsState()
 
@@ -70,9 +69,8 @@ fun AppSelector(
                     DropdownMenuItem(
                         text = { Text(appName) },
                         onClick = {
-                            selectedApp = appName
                             expanded = false
-                            onAppSelected(app.packageName)
+                            viewModel.setSelectedApp(app.packageName)
                         }
                     )
                 }

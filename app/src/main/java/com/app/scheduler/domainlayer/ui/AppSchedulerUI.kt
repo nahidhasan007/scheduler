@@ -37,7 +37,7 @@ fun AppSchedulerUI(
     viewModel: SchedulerMainViewModel
 ) {
     val schedules by viewModel.schedules.collectAsState(initial = emptyList())
-    var selectedApp by remember { mutableStateOf<String?>(null) }
+    val selectedApp by viewModel.selectedApp.collectAsState()
     var scheduleTime by remember { mutableStateOf<Long?>(null) }
 
     Scaffold(
@@ -65,7 +65,7 @@ fun AppSchedulerUI(
                 modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp)
             )
 
-            AppSelector(onAppSelected = { selectedApp = it },
+            AppSelector(
                 onLoadApps = {
                     viewModel.loadInstalledApps(context)
                 },
@@ -92,11 +92,11 @@ fun AppSchedulerUI(
                 items(schedules) { schedule ->
                     ScheduleItem(
                         schedule,
-                        onCancel = { viewModel.cancelSchedule(context, schedule.id) },
+                        onCancel = { viewModel.cancelSchedule(context, schedule) },
                         onReschedule = { newTime ->
                             viewModel.rescheduleApp(
                                 context,
-                                schedule.id,
+                                schedule,
                                 newTime
                             )
                         }
