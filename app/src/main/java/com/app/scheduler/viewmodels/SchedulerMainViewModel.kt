@@ -73,10 +73,10 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     @SuppressLint("ScheduleExactAlarm")
     private fun setAlarm(context: Context, schedule: AppSchedule) {
-        Log.e("Scheduler", "Sending intent for package: ${schedule.packageName}")
+        Log.e(TAG, "Sending intent for package: ${schedule.packageName}")
         val intent = Intent(context, AppScheduleLauncher::class.java).apply {
-            putExtra("packageName", schedule.packageName)
-            putExtra("scheduleId", schedule.id)
+            putExtra(PACKAGENAME, schedule.packageName)
+            putExtra(SCHEDULEID, schedule.id)
             data = Uri.parse("appschedule://${schedule.id}")
         }
         val pendingIntent = PendingIntent.getBroadcast(
@@ -94,7 +94,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
 
     private fun cancelAlarm(context: Context, appSchedule: AppSchedule) {
-        Log.e("Scheduler", "Deleting intent")
+        Log.e(TAG, "Deleting intent")
         val intent = Intent(context, AppScheduleLauncher::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context, appSchedule.id, intent, PendingIntent.FLAG_IMMUTABLE
@@ -122,6 +122,12 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
                 _isLoadingApps.value = false
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "SchedulerMainViewModel"
+        const val PACKAGENAME = "packageName"
+        const val SCHEDULEID = "scheduleId"
     }
 }
 

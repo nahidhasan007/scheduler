@@ -70,7 +70,7 @@ fun AppSelector(
                         text = { Text(appName) },
                         onClick = {
                             expanded = false
-                            viewModel.setSelectedApp(app.packageName)
+                            viewModel.setSelectedApp(app.packageName)   // update with full app info
                         }
                     )
                 }
