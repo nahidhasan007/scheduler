@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +49,7 @@ fun AppSchedulerUI(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
+                        color = Color.Gray,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -60,14 +62,20 @@ fun AppSchedulerUI(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W500,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp)
             )
 
-            AppSelector(onAppSelected = { selectedApp = it })
+            AppSelector(onAppSelected = { selectedApp = it },
+                onLoadApps = {
+                    viewModel.loadInstalledApps(context)
+                },
+                viewModel = viewModel
+            )
 
             TimePickerDialog(onTimeSelected = { scheduleTime = it })
 
             Button(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                 onClick = {
                     if (selectedApp != null && scheduleTime != null) {
                         viewModel.scheduleApp(context, selectedApp!!, scheduleTime!!)

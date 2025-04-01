@@ -1,7 +1,5 @@
 package com.app.scheduler.domainlayer.ui
 
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -13,7 +11,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,34 +22,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.app.scheduler.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.app.scheduler.viewmodels.SchedulerMainViewModel
 
 @Composable
-fun AppSelector(onAppSelected: (String) -> Unit) {
+fun AppSelector(
+    onAppSelected: (String) -> Unit,
+    onLoadApps: () -> Unit,
+    viewModel: SchedulerMainViewModel
+) {
     val context = LocalContext.current
     val packageManager = context.packageManager
 
     var expanded by remember { mutableStateOf(false) }
     var selectedApp by remember { mutableStateOf<String?>(null) }
-    var installedApps by remember { mutableStateOf<List<ApplicationInfo>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(false) }
+    val installedApps = viewModel.installedApps.collectAsState()
+    val isLoading = viewModel.isLoadingApps.collectAsState()
 
-    LaunchedEffect(expanded) {
-        if (expanded && installedApps.isEmpty()) {
-            withContext(Dispatchers.IO) {
-                val apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-                    .filter { packageManager.getLaunchIntentForPackage(it.packageName) != null }
-                    .sortedBy { it.loadLabel(packageManager).toString().lowercase() }
-                installedApps = apps
-                isLoading = false
-            }
-        }
-    }
 
-    Box(modifier = Modifier.padding(top = 4.dp)) {
+    Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) {
         Button(onClick = {
             expanded = true
+            onLoadApps.invoke()
         }) {
             Text(selectedApp ?: stringResource(R.string.scheduler_select_app))
         }
@@ -61,7 +52,7 @@ fun AppSelector(onAppSelected: (String) -> Unit) {
             onDismissRequest = { expanded = false },
             modifier = Modifier.heightIn(max = 300.dp)
         ) {
-            if (isLoading) {
+            if (isLoading.value) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -74,7 +65,7 @@ fun AppSelector(onAppSelected: (String) -> Unit) {
                     )
                 }
             } else {
-                installedApps.forEach { app ->
+                installedApps.value.forEach { app ->
                     val appName = app.loadLabel(packageManager).toString()
                     DropdownMenuItem(
                         text = { Text(appName) },

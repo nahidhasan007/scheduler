@@ -5,6 +5,8 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,11 +15,19 @@ import com.app.scheduler.datalayer.AppSchedule
 import com.app.scheduler.network.local.ScheduleDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     val schedules = MutableStateFlow<List<AppSchedule>>(emptyList())
+
+    private val _installedApps = MutableStateFlow<List<ApplicationInfo>>(emptyList())
+    val installedApps = _installedApps.asStateFlow()
+
+    private val _isLoadingApps = MutableStateFlow(false)
+    val isLoadingApps = _isLoadingApps.asStateFlow()
 
     init {
         fetchSchedules()
@@ -34,6 +44,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
             val schedule = AppSchedule(packageName = packageName, scheduleTime = time)
             dao.insertSchedule(schedule)
             setAlarm(context, schedule)
+            schedules.value = dao.getPendingSchedules()
         }
     }
 
@@ -41,6 +52,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             dao.deleteSchedule(id)
             cancelAlarm(context, id)
+            schedules.value = dao.getPendingSchedules()
         }
     }
 
@@ -48,6 +60,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             dao.updateSchedule(id, newTime)
             updateAlarm(context, id, newTime)
+            schedules.value = dao.getPendingSchedules()
         }
     }
 
@@ -82,6 +95,22 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         cancelAlarm(context, id)
         val schedule = AppSchedule(id = id, scheduleTime = newTime, packageName = "")
         setAlarm(context, schedule)
+    }
+
+    fun loadInstalledApps(context: Context) {
+        if (_installedApps.value.isNotEmpty()) return
+
+        viewModelScope.launch {
+            _isLoadingApps.value = true
+            withContext(Dispatchers.IO) {
+                val packageManager = context.packageManager
+                val apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                    .filter { packageManager.getLaunchIntentForPackage(it.packageName) != null }
+                    .sortedBy { it.loadLabel(packageManager).toString().lowercase() }
+                _installedApps.value = apps
+                _isLoadingApps.value = false
+            }
+        }
     }
 }
 

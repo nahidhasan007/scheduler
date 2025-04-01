@@ -1,5 +1,6 @@
 package com.app.scheduler.domainlayer.ui
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -7,8 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.app.scheduler.R
 import java.util.Calendar
 
@@ -18,7 +21,9 @@ fun TimePickerDialog(onTimeSelected: (Long) -> Unit) {
     val calendar = Calendar.getInstance()
     var showDialog by remember { mutableStateOf(false) }
 
-    Button(onClick = { showDialog = true }) {
+    Button(
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+        onClick = { showDialog = true }) {
         Text(stringResource(R.string.scheduler_pick_time))
     }
 
