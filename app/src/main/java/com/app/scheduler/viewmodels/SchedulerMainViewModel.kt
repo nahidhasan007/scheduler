@@ -79,11 +79,13 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
             putExtra(SCHEDULEID, schedule.id)
             data = Uri.parse("appschedule://${schedule.id}")
         }
+        val requestCode = (schedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
+
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            schedule.id,
+            requestCode,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -95,9 +97,14 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     private fun cancelAlarm(context: Context, appSchedule: AppSchedule) {
         Log.e(TAG, "Deleting intent")
-        val intent = Intent(context, AppScheduleLauncher::class.java)
+        val intent = Intent(context, AppScheduleLauncher::class.java).apply {
+            putExtra(PACKAGENAME, appSchedule.packageName)
+            putExtra(SCHEDULEID, appSchedule.id)
+            data = Uri.parse("appschedule://${appSchedule.id}")
+        }
+        val requestCode = (appSchedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
         val pendingIntent = PendingIntent.getBroadcast(
-            context, appSchedule.id, intent, PendingIntent.FLAG_IMMUTABLE
+            context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent)
@@ -105,7 +112,8 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     private fun updateAlarm(context: Context, appSchedule: AppSchedule, newTime: Long) {
         cancelAlarm(context, appSchedule)
-        setAlarm(context, appSchedule)
+        val newSchedule = appSchedule.copy(scheduleTime = newTime)
+        setAlarm(context, newSchedule)
     }
 
     fun loadInstalledApps(context: Context) {
