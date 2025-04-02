@@ -1,11 +1,16 @@
 package com.app.scheduler.domainlayer.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -23,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.app.scheduler.R
 import com.app.scheduler.network.local.SchedulerDatabase
+import com.app.scheduler.ui.theme.BaseDark300
 import com.app.scheduler.viewmodels.SchedulerMainViewModel
 import com.app.scheduler.viewmodels.SchedulerMainViewModelFactory
 
@@ -45,6 +51,7 @@ fun ScheduleHistoryList(
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.background(color = BaseDark300),
                 title = {
                     Text(
                         stringResource(R.string.scheduler_history),
@@ -54,6 +61,11 @@ fun ScheduleHistoryList(
                         color = Color.Black,
                         modifier = Modifier.fillMaxWidth()
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
                 }
             )
         }

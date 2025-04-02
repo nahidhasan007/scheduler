@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -22,6 +23,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.app.scheduler.R
+import com.app.scheduler.ui.theme.BaseBlack
+import com.app.scheduler.ui.theme.BaseDark300
+import com.app.scheduler.ui.theme.BaseTransparent
 import com.app.scheduler.viewmodels.SchedulerMainViewModel
 
 @Composable
@@ -42,7 +46,12 @@ fun AppSelector(
         Button(onClick = {
             expanded = true
             onLoadApps.invoke()
-        }) {
+        }, colors = ButtonColors(
+            containerColor = BaseDark300,
+            contentColor = BaseBlack,
+            disabledContentColor = BaseTransparent,
+            disabledContainerColor = BaseTransparent
+        )) {
             Text(selectedApp ?: stringResource(R.string.scheduler_select_app))
         }
 
