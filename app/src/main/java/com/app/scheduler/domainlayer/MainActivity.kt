@@ -14,10 +14,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 import com.app.scheduler.viewmodels.SchedulerMainViewModel
 import com.app.scheduler.viewmodels.SchedulerMainViewModelFactory
-import com.app.scheduler.domainlayer.ui.AppSchedulerUI
+import com.app.scheduler.navigation.AppNavigation
 import com.app.scheduler.network.local.SchedulerDatabase
 import com.app.scheduler.ui.theme.MyApplicationTheme
 
@@ -33,9 +33,10 @@ class MainActivity : ComponentActivity() {
             MyApplicationTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val modifier = Modifier.padding(innerPadding)
-                    val viewModel: SchedulerMainViewModel =
+                    /*val viewModel: SchedulerMainViewModel =
                         viewModel(factory = SchedulerMainViewModelFactory(dao))
-                    AppSchedulerUI(modifier = modifier, this, viewModel)
+                    AppSchedulerUI(modifier = modifier, this, viewModel)*/
+                    AppNavigation()
                 }
             }
         }

@@ -79,7 +79,8 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
             putExtra(SCHEDULEID, schedule.id)
             data = Uri.parse("appschedule://${schedule.id}")
         }
-        val requestCode = (schedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
+        val requestCode =
+            (schedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -92,6 +93,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP, schedule.scheduleTime, pendingIntent
         )
+
     }
 
 
@@ -102,9 +104,13 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
             putExtra(SCHEDULEID, appSchedule.id)
             data = Uri.parse("appschedule://${appSchedule.id}")
         }
-        val requestCode = (appSchedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
+        val requestCode =
+            (appSchedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
         val pendingIntent = PendingIntent.getBroadcast(
-            context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent)
@@ -130,6 +136,10 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
                 _isLoadingApps.value = false
             }
         }
+    }
+
+    suspend fun getScheduleById(id: Int): AppSchedule? {
+        return dao.getScheduleById(id)
     }
 
     companion object {

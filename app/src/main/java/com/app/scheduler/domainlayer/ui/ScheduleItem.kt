@@ -2,11 +2,14 @@ package com.app.scheduler.domainlayer.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -22,9 +25,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.scheduler.R
 import com.app.scheduler.datalayer.AppSchedule
+import com.app.scheduler.ui.theme.BaseGreen500
+import com.app.scheduler.ui.theme.BaseOrange500
+import com.app.scheduler.ui.theme.BasePrimary100
+import com.app.scheduler.ui.theme.BasePrimary500
+import com.app.scheduler.ui.theme.BaseRed500
+import com.app.scheduler.ui.theme.BaseTransparent
+import com.app.scheduler.ui.theme.BaseWhite
+import com.app.scheduler.utils.isScheduleExecuted
 import java.util.Calendar
 import java.util.Date
 
@@ -46,17 +58,63 @@ fun ScheduleItem(schedule: AppSchedule, onCancel: () -> Unit, onReschedule: (Lon
                     Text("App: ${schedule.packageName}", fontWeight = FontWeight.Bold)
                     Text("Scheduled Time: ${Date(schedule.scheduleTime)}")
                 }
-                IconButton(onClick = onCancel) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.scheduler_cancel_schedule)
+                if (!schedule.scheduleTime.isScheduleExecuted()) {
+                    IconButton(onClick = onCancel) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.scheduler_cancel_schedule),
+                            tint = BaseRed500
+                        )
+                    }
+
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (!schedule.scheduleTime.isScheduleExecuted()) {
+                    Button(
+                        modifier = Modifier.height(40.dp),
+                        onClick = { showTimePicker = true },
+                        colors = ButtonColors(
+                            containerColor = BasePrimary500,
+                            contentColor = BaseWhite,
+                            disabledContentColor = BasePrimary100,
+                            disabledContainerColor = BasePrimary100
+                        )
+                    ) {
+                        Text(stringResource(R.string.reschedule_app))
+                    }
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                Button(
+                    modifier = Modifier.height(40.dp),
+                    onClick = { showTimePicker = true },
+                    colors = ButtonColors(
+                        containerColor = if (schedule.scheduleTime.isScheduleExecuted()) {
+                            BaseGreen500
+                        } else {
+                            BaseOrange500
+                        },
+                        contentColor = BaseWhite,
+                        disabledContentColor = BaseTransparent,
+                        disabledContainerColor = BaseTransparent
+                    )
+                ) {
+                    Text(
+                        text = if (schedule.scheduleTime.isScheduleExecuted()) stringResource(R.string.schedule_completed) else stringResource(
+                            R.string.schedule_pending
+                        )
                     )
                 }
             }
 
-            Button(onClick = { showTimePicker = true }) {
-                Text("Reschedule")
-            }
 
             if (showTimePicker) {
                 val timePickerDialog = android.app.TimePickerDialog(
@@ -75,4 +133,19 @@ fun ScheduleItem(schedule: AppSchedule, onCancel: () -> Unit, onReschedule: (Lon
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun PreviewScheduleItem() {
+    val specificSchedule = AppSchedule(
+        packageName = "com.example.anotherapp",
+        scheduleTime = 1735689600000,
+        executed = false
+    )
+    ScheduleItem(
+        schedule = specificSchedule,
+        onCancel = {},
+        onReschedule = {}
+    )
 }

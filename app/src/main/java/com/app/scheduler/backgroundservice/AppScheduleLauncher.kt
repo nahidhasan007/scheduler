@@ -1,10 +1,14 @@
 package com.app.scheduler.backgroundservice
 
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.app.scheduler.network.local.SchedulerDatabase
+import com.app.scheduler.viewmodels.SchedulerMainViewModel
 import com.app.scheduler.viewmodels.SchedulerMainViewModel.Companion.PACKAGENAME
 import com.app.scheduler.viewmodels.SchedulerMainViewModel.Companion.SCHEDULEID
 import kotlinx.coroutines.CoroutineScope
@@ -18,15 +22,25 @@ class AppScheduleLauncher : BroadcastReceiver() {
         val scheduleId = intent?.getIntExtra(SCHEDULEID, -1)
 
         if (!packageName.isNullOrEmpty() && scheduleId != -1) {
+
+            val viewModel = createViewModel(context.applicationContext)
+
             val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)
             launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(launchIntent)
 
             CoroutineScope(Dispatchers.IO).launch {
                 val db = SchedulerDatabase.getDatabase(context)
+                Log.e(TAG, "Marking schedule as executed id: $scheduleId")
                 db.schedulerDao().markAsExecuted(scheduleId!!)
             }
         }
+    }
+
+    private fun createViewModel(context: Context): SchedulerMainViewModel {
+        val application = context.applicationContext as Application
+        val dao = SchedulerDatabase.getDatabase(application).schedulerDao()
+        return SchedulerMainViewModel(dao)
     }
 
     companion object {
