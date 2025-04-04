@@ -46,7 +46,7 @@ fun ScheduleHistoryList(
     val viewModel: SchedulerMainViewModel =
         viewModel(factory = SchedulerMainViewModelFactory(dao))
 
-    val schedules by viewModel.schedules.collectAsState(initial = emptyList())
+    val schedules by viewModel.scheduleList.collectAsState(initial = emptyList())
 
     Scaffold(
         topBar = {

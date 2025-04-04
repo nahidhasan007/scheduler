@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
 
 class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
-    val schedules = MutableStateFlow<List<AppSchedule>>(emptyList())
+    val scheduleList = MutableStateFlow<List<AppSchedule>>(emptyList())
 
     private val _installedApps = MutableStateFlow<List<ApplicationInfo>>(emptyList())
     val installedApps = _installedApps.asStateFlow()
@@ -38,7 +38,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     private fun fetchSchedules() {
         viewModelScope.launch(Dispatchers.IO) {
-            schedules.value = dao.getPendingSchedules()
+            scheduleList.value = dao.getAllSchedules()
         }
     }
 
@@ -51,7 +51,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
             val schedule = AppSchedule(packageName = packageName, scheduleTime = time)
             dao.insertSchedule(schedule)
             setAlarm(context, schedule)
-            schedules.value = dao.getPendingSchedules()
+            scheduleList.value = dao.getAllSchedules()
         }
     }
 
@@ -59,7 +59,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             dao.deleteSchedule(appSchedule.id)
             cancelAlarm(context, appSchedule)
-            schedules.value = dao.getPendingSchedules()
+            scheduleList.value = dao.getAllSchedules()
         }
     }
 
@@ -67,7 +67,7 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             dao.updateSchedule(appSchedule.id, newTime)
             updateAlarm(context, appSchedule, newTime)
-            schedules.value = dao.getPendingSchedules()
+            scheduleList.value = dao.getAllSchedules()
         }
     }
 

@@ -20,7 +20,7 @@ interface ScheduleDao {
     @Query("SELECT * FROM app_schedule WHERE executed = 0 ORDER BY scheduleTime ASC")
     suspend fun getPendingSchedules(): List<AppSchedule>
 
-    @Query("SELECT * FROM app_schedule WHERE scheduleTime ORDER BY scheduleTime ASC")
+    @Query("SELECT * FROM app_schedule WHERE scheduleTime ORDER BY scheduleTime DESC")
     suspend fun getAllSchedules(): List<AppSchedule>
 
     @Query("UPDATE app_schedule SET executed = 1 WHERE id = :id")

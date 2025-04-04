@@ -54,7 +54,7 @@ fun AppSchedulerUI(
     val viewModel: SchedulerMainViewModel =
         viewModel(factory = SchedulerMainViewModelFactory(dao))
 
-    val schedules by viewModel.schedules.collectAsState(initial = emptyList())
+    val schedules by viewModel.scheduleList.collectAsState(initial = emptyList())
     val selectedApp by viewModel.selectedApp.collectAsState()
     var scheduleTime by remember { mutableStateOf<Long?>(null) }
 
