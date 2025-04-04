@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Scheduler</string>
+    <string name="app_name">App Scheduler</string>
     <string name="scheduler_select_app">Select an App</string>
     <string name="scheduler_pick_time">Pick a Time</string>">
     <string name="scheduler_schedule_app">Schedule App</string>

@@ -36,6 +36,7 @@ import com.app.scheduler.navigation.Routes
 import com.app.scheduler.network.local.SchedulerDatabase
 import com.app.scheduler.ui.theme.BaseBlack
 import com.app.scheduler.ui.theme.BaseDark300
+import com.app.scheduler.ui.theme.BaseDark600
 import com.app.scheduler.ui.theme.BaseTransparent
 import com.app.scheduler.viewmodels.SchedulerMainViewModel
 import com.app.scheduler.viewmodels.SchedulerMainViewModelFactory
