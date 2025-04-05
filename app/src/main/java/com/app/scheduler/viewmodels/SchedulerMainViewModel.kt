@@ -48,8 +48,8 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     fun scheduleApp(context: Context, packageName: String, time: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            val schedule = AppSchedule(packageName = packageName, scheduleTime = time)
-            dao.insertSchedule(schedule)
+            val id = dao.insertSchedule(AppSchedule(packageName = packageName, scheduleTime = time)).toInt()
+            val schedule = AppSchedule(id = id, packageName = packageName, scheduleTime = time)
             setAlarm(context, schedule)
             scheduleList.value = dao.getAllSchedules()
         }
@@ -65,13 +65,15 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     fun rescheduleApp(context: Context, appSchedule: AppSchedule, newTime: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            cancelSchedule(context, appSchedule)
-            val newSchedule = AppSchedule(packageName = appSchedule.packageName, scheduleTime = newTime)
-            dao.insertSchedule(newSchedule)
+            cancelAlarm(context, appSchedule)
+            dao.deleteSchedule(appSchedule.id)
+            val id = dao.insertSchedule(AppSchedule(packageName = appSchedule.packageName, scheduleTime = newTime)).toInt()
+            val newSchedule = AppSchedule(id = id, packageName = appSchedule.packageName, scheduleTime = newTime)
             setAlarm(context, newSchedule)
             scheduleList.value = dao.getAllSchedules()
         }
     }
+
 
     @SuppressLint("ScheduleExactAlarm")
     private fun setAlarm(context: Context, schedule: AppSchedule) {

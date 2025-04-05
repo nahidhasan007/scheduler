@@ -9,7 +9,7 @@ import com.app.scheduler.datalayer.AppSchedule
 @Dao
 interface ScheduleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSchedule(schedule: AppSchedule)
+    suspend fun insertSchedule(schedule: AppSchedule) : Long
 
     @Query("DELETE FROM app_schedule WHERE id = :id")
     suspend fun deleteSchedule(id: Int)
