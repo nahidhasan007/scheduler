@@ -29,32 +29,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.app.scheduler.R
 import com.app.scheduler.navigation.Routes
-import com.app.scheduler.network.local.SchedulerDatabase
 import com.app.scheduler.ui.theme.BaseBlack
 import com.app.scheduler.ui.theme.BaseDark300
-import com.app.scheduler.ui.theme.BaseDark600
 import com.app.scheduler.ui.theme.BaseTransparent
 import com.app.scheduler.viewmodels.SchedulerMainViewModel
-import com.app.scheduler.viewmodels.SchedulerMainViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppSchedulerUI(
     modifier: Modifier = Modifier,
     navController: NavController,
+    viewModel: SchedulerMainViewModel
 ) {
     val context = LocalContext.current
-
-    val database = SchedulerDatabase.getDatabase(context)
-    val dao = database.schedulerDao()
-
-    val viewModel: SchedulerMainViewModel =
-        viewModel(factory = SchedulerMainViewModelFactory(dao))
-
     val schedules by viewModel.scheduleList.collectAsState(initial = emptyList())
     val selectedApp by viewModel.selectedApp.collectAsState()
     var scheduleTime by remember { mutableStateOf<Long?>(null) }

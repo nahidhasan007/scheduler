@@ -65,9 +65,10 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
 
     fun rescheduleApp(context: Context, appSchedule: AppSchedule, newTime: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            cancelAlarm(context, appSchedule)
-            dao.updateSchedule(appSchedule.id, newTime)
-            updateAlarm(context, appSchedule, newTime)
+            cancelSchedule(context, appSchedule)
+            val newSchedule = AppSchedule(packageName = appSchedule.packageName, scheduleTime = newTime)
+            dao.insertSchedule(newSchedule)
+            setAlarm(context, newSchedule)
             scheduleList.value = dao.getAllSchedules()
         }
     }
@@ -78,16 +79,16 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         val intent = Intent(context, AppScheduleLauncher::class.java).apply {
             putExtra(PACKAGENAME, schedule.packageName)
             putExtra(SCHEDULEID, schedule.id)
-            data = Uri.parse("appschedule://${schedule.id}")
+            data = Uri.parse("appschedule://${schedule.id}/${schedule.packageName}")
         }
-        val requestCode =
-            (schedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
+        val requestCode = schedule.id
+            //(schedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,
             intent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -103,10 +104,10 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
         val intent = Intent(context, AppScheduleLauncher::class.java).apply {
             putExtra(PACKAGENAME, appSchedule.packageName)
             putExtra(SCHEDULEID, appSchedule.id)
-            data = Uri.parse("appschedule://${appSchedule.id}")
+            data = Uri.parse("appschedule://${appSchedule.id}/${appSchedule.packageName}")
         }
-        val requestCode =
-            (appSchedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
+        val requestCode = appSchedule.id
+          //  (appSchedule.id.toString() + System.currentTimeMillis().toString()).hashCode()
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             requestCode,

@@ -21,10 +21,9 @@ class AppScheduleLauncher : BroadcastReceiver() {
         val packageName = intent?.getStringExtra(PACKAGENAME)
         val scheduleId = intent?.getIntExtra(SCHEDULEID, -1)
 
+        Log.e(TAG, "Intent: $intent")
+
         if (!packageName.isNullOrEmpty() && scheduleId != -1) {
-
-            val viewModel = createViewModel(context.applicationContext)
-
             val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)
             launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(launchIntent)
@@ -36,13 +35,6 @@ class AppScheduleLauncher : BroadcastReceiver() {
             }
         }
     }
-
-    private fun createViewModel(context: Context): SchedulerMainViewModel {
-        val application = context.applicationContext as Application
-        val dao = SchedulerDatabase.getDatabase(application).schedulerDao()
-        return SchedulerMainViewModel(dao)
-    }
-
     companion object {
         const val TAG = "scheduler"
     }

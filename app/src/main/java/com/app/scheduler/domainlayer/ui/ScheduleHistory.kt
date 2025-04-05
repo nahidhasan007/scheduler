@@ -37,15 +37,9 @@ import com.app.scheduler.viewmodels.SchedulerMainViewModelFactory
 fun ScheduleHistoryList(
     modifier: Modifier = Modifier,
     navController: NavController,
+    viewModel: SchedulerMainViewModel
 ) {
     val context = LocalContext.current
-
-    val database = SchedulerDatabase.getDatabase(context)
-    val dao = database.schedulerDao()
-
-    val viewModel: SchedulerMainViewModel =
-        viewModel(factory = SchedulerMainViewModelFactory(dao))
-
     val schedules by viewModel.scheduleList.collectAsState(initial = emptyList())
 
     Scaffold(
