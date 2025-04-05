@@ -66,10 +66,9 @@ class SchedulerMainViewModel(private val dao: ScheduleDao) : ViewModel() {
     fun rescheduleApp(context: Context, appSchedule: AppSchedule, newTime: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             cancelAlarm(context, appSchedule)
-            dao.deleteSchedule(appSchedule.id)
-            val id = dao.insertSchedule(AppSchedule(packageName = appSchedule.packageName, scheduleTime = newTime)).toInt()
-            val newSchedule = AppSchedule(id = id, packageName = appSchedule.packageName, scheduleTime = newTime)
-            setAlarm(context, newSchedule)
+            val updatedSchedule = appSchedule.copy(scheduleTime = newTime)
+            dao.updateSchedule(updatedSchedule)
+            setAlarm(context, updatedSchedule)
             scheduleList.value = dao.getAllSchedules()
         }
     }

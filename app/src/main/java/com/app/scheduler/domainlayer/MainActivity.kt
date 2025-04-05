@@ -3,6 +3,7 @@ package com.app.scheduler.domainlayer
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         checkAndRequestPermissions()
+        handleDozeModeAndBatteryOptimization()
         setContent {
             MyApplicationTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -45,6 +47,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun handleDozeModeAndBatteryOptimization() {
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        intent.data = Uri.parse("package:$packageName")
+        startActivity(intent)
     }
 
 

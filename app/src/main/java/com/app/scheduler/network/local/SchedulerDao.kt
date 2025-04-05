@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.app.scheduler.datalayer.AppSchedule
 
 @Dao
@@ -16,6 +17,9 @@ interface ScheduleDao {
 
     @Query("UPDATE app_schedule SET scheduleTime = :newTime WHERE id = :id")
     suspend fun updateSchedule(id: Int, newTime: Long)
+
+    @Update
+    suspend fun updateSchedule(schedule: AppSchedule)
 
     @Query("SELECT * FROM app_schedule WHERE executed = 0 ORDER BY scheduleTime ASC")
     suspend fun getPendingSchedules(): List<AppSchedule>
